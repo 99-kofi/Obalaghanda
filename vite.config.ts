@@ -1,18 +1,17 @@
-import { defineConfig, loadEnv } from 'vite';
-import path from 'path';
+// vite.config.ts
+import { defineConfig } from 'vite'
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-  return {
-    define: {
-      'process.env': {
-        API_KEY: JSON.stringify(env.VITE_API_KEY),
-      }
-    },
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      }
-    }
-  };
-});
+export default defineConfig({
+  base: '/',
+  server: {
+    host: true,
+  },
+  preview: {
+    allowedHosts: [
+      'obalaghanda.onrender.com',
+      'localhost' // For local testing
+    ],
+    host: true,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 10000
+  }
+})
