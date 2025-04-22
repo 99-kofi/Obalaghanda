@@ -20,7 +20,8 @@
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
   },
-  "scripts": {
-  "start": "vite preview --port 10000"
- }
+ "scripts": {
+  "build": "vite build",
+  "preview": "vite preview --port $PORT --host 0.0.0.0"
+}
 }
