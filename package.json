@@ -19,5 +19,8 @@
     "@types/node": "^22.14.0",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
-  }
+  },
+  "scripts": {
+  "start": "vite preview --port 10000"
+ }
 }
