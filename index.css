@@ -960,3 +960,25 @@ canvas {
   height: 100% !important;
   border: none;
 }
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .playground {
+    flex-direction: column;
+  }
+  .sidebar, .main-container {
+    flex: none;
+    width: 100% !important;
+    height: 50vh !important; /* Equal split on tablets */
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .main-container {
+    height: 60vh !important; /* Larger canvas on phones */
+  }
+  .sidebar {
+    height: 40vh !important;
+  }
+}
