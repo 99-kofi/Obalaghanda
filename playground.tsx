@@ -414,17 +414,17 @@ function windowResized() {
        </svg>
         </button>`
         
-        html`<div
+      html`<div
              id="chat"
              class=${classMap({
-            tabcontent: true,
-           showtab: this.selectedChatTab === ChatTab.GEMINI
-           })}
+             tabcontent: true,
+             showtab: this.selectedChatTab === ChatTab.GEMINI
+            })}
            >`
            
           <div class="chat-messages">
-            ${this.messages}
-            <div id="anchor"></div>
+             ${this.messages}
+             <div id="anchor"></div>
           </div>
 
           <div class="footer">
