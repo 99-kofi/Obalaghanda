@@ -982,3 +982,32 @@ canvas {
     height: 40vh !important;
   }
 }
+
+/* Fullscreen styling */
+.preview-iframe:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  background: var(--color-bg);
+}
+
+.preview-iframe:-moz-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+/* Button styling */
+#fullscreen {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: 15px;
+}
+
+#fullscreen svg {
+  fill: var(--color-accent);
+}
+
+#fullscreen:hover svg {
+  fill: var(--color-accent2);
+}
