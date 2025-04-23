@@ -203,9 +203,14 @@ function windowResized() {
     ${code}
     
     // Auto-resize handling
-    function windowResized() {
-      resizeCanvas(window.innerWidth, window.innerHeight);
-    }
+   function setup() {
+    let canvas = createCanvas(window.innerWidth, window.innerHeight);
+    canvas.style('display', 'block');
+  }
+
+  function windowResized() {
+    resizeCanvas(window.innerWidth, window.innerHeight);
+  }
   </script>
 </head>
 <body>
