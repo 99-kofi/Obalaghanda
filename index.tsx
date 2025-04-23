@@ -243,3 +243,11 @@ const setMobileViewport = () => {
 
 window.addEventListener('resize', setMobileViewport);
 setMobileViewport(); // Run on load
+// Prevent input field hiding on keyboard open
+const input = document.getElementById('messageInput');
+if (input) {
+  input.addEventListener('focus', () => {
+    window.scrollTo(0, 0);
+    document.documentElement.style.setProperty('--keyboard-height', '300px');
+  });
+}
