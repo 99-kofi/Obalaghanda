@@ -884,7 +884,16 @@ canvas {
     transform: translateY(-50%);
   }
 }
+.chat-messages {
+  padding-bottom: 80px !important; /* Matches input height */
+}
 
+/* For mobile screens */
+@media (max-width: 768px) {
+  .chat-messages {
+    padding-bottom: 100px !important; /* Extra space for keyboard */
+  }
+}
 #inputArea {
   position: fixed;       /* Lock to bottom */
   bottom: 0;             /* Stick to bottom */
