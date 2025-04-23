@@ -233,3 +233,13 @@ if (transitionOverlay) {
     }, 1500);
   }, 3000);
 }
+
+// Handle mobile viewport
+const setMobileViewport = () => {
+  if (window.innerWidth <= 768) {
+    document.documentElement.style.setProperty('--sidebar-width', '100%');
+  }
+};
+
+window.addEventListener('resize', setMobileViewport);
+setMobileViewport(); // Run on load
