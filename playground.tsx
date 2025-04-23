@@ -417,7 +417,7 @@ function windowResized() {
         <div>
           id="chat"
           class=${classMap({
-            'tabcontent': true,
+            tabcontent: true,
             'showtab': this.selectedChatTab === ChatTab.GEMINI,
           })}>
           <div class="chat-messages">
