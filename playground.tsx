@@ -97,6 +97,17 @@ export class Playground extends LitElement {
     document.createElement('iframe');
   private lastError = '';
   private reportedError = false;
+  private toggleFullscreen() {
+  const iframe = this.previewFrame;
+  
+  if (!document.fullscreenElement) {
+    iframe.requestFullscreen().catch(err => {
+      console.error("Fullscreen error:", err);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+}
 
   sendMessageHandler?: CallableFunction;
   resetHandler?: CallableFunction;
@@ -393,6 +404,15 @@ function windowResized() {
             }}>
             Code ${this.codeHasChanged ? ICON_EDIT : html``}
           </button>
+          // Add this with other toolbar buttons
+      <button 
+        id="fullscreen" 
+        @click=${this.toggleFullscreen}
+        title="Toggle Fullscreen">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+        <path d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z"/>
+       </svg>
+        </button>`
         </div>
         <div
           id="chat"
