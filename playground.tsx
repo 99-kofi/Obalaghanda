@@ -166,44 +166,39 @@ setMobileViewport(); // Run on load
     this.lastError = '';
 
     const htmlContent = `
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>p5.js Sketch</title>
-                    <style>
-                        body { margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f8f9fa; }
-                        main { display: flex; justify-content: center; align-items: center; }
-                        .console { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.7); padding: 1em; margin: 0; color: red; font-family: monospace;}
-                    </style>
-                    <script src="${p5jsCdnUrl}"></script>
-                    <script>
-                      window.addEventListener('message', (event) => {
-                          if (event.data === 'stop' && typeof noLoop === 'function') { noLoop(); console.log('Sketch stopped (noLoop)'); }
-                          else if (event.data === 'resume' && typeof loop === 'function') { loop(); console.log('Sketch resumed (loop)'); }
-                      }, false);
-                    </script>
-                </head>
-                <body>
-                    <script>
-                        // Basic error handling within the iframe
-                        try {
-                            ${code}
-                        } catch (error) {
-                            console.error("Error in sketch:", error);
-                            parent.postMessage(
-                              JSON.stringify({
-                                message: error.toString()
-                              })
-                            );
-                            document.body.innerHTML = '<pre class="console">Error: ' + error.message + '\\nCheck the browser console for details or ask Gemini to fix it.</pre>';
-                        }
-                    </script>
-                </body>
-                </html>
-            `;
-
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    body, html { 
+      margin: 0; 
+      padding: 0; 
+      width: 100%; 
+      height: 100%;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain;
+    }
+  </style>
+  <script src="${p5jsCdnUrl}"></script>
+  <script>
+    ${code}
+    
+    // Auto-resize handling
+    function windowResized() {
+      resizeCanvas(window.innerWidth, window.innerHeight);
+    }
+  </script>
+</head>
+<body>
+</body>
+</html>
+`;
     this.previewFrame.setAttribute('srcdoc', htmlContent);
     this.codeNeedsReload = false;
   }
