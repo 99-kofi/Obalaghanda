@@ -414,12 +414,14 @@ function windowResized() {
        </svg>
         </button>`
         
-        <div>
-          id="chat"
-          class=${classMap({
+        html`<div
+             id="chat"
+             class=${classMap({
             tabcontent: true,
-            'showtab': this.selectedChatTab === ChatTab.GEMINI,
-          })}>
+           showtab: this.selectedChatTab === ChatTab.GEMINI
+           })}
+           >`
+           
           <div class="chat-messages">
             ${this.messages}
             <div id="anchor"></div>
