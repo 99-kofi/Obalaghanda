@@ -108,6 +108,20 @@ export class Playground extends LitElement {
 
     this.codeSyntax.classList.add('code-syntax');
 
+  // Handle mobile viewport
+ const setMobileViewport = () => {
+  if (window.innerWidth <= 768) {
+    document.documentElement.style.setProperty('--sidebar-width', '100%');
+  }
+};
+
+window.addEventListener('resize', setMobileViewport);
+setMobileViewport(); // Run on load
+
+
+
+  
+
     /* Receive message from the iframe in case any error occures. */
     window.addEventListener(
       'message',
