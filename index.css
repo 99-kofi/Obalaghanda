@@ -938,3 +938,25 @@ canvas {
     height: 40vh !important;
   }
 }
+/* Main container adjustments */
+.playground {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  flex: 0 0 45%; /* Reduce sidebar width */
+  overflow: hidden;
+}
+
+.main-container {
+  flex: 1; /* Take remaining space */
+  min-width: 55%; /* Minimum preview size */
+}
+
+/* Canvas sizing */
+.preview-iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none;
+}
