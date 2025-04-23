@@ -11,7 +11,7 @@ import {classMap} from 'lit/directives/class-map.js';
 import {Marked} from 'marked';
 import {markedHighlight} from 'marked-highlight';
 
-/** Markdown formatting function with syntax hilighting */
+/** Markdown formatting function with syntax highlighting */
 export const marked = new Marked(
   markedHighlight({
     async: true,
@@ -34,6 +34,7 @@ const ICON_BUSY = html`<svg
   <path
     d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-155.5t86-127Q252-817 325-848.5T480-880q17 0 28.5 11.5T520-840q0 17-11.5 28.5T480-800q-133 0-226.5 93.5T160-480q0 133 93.5 226.5T480-160q133 0 226.5-93.5T800-480q0-17 11.5-28.5T840-520q17 0 28.5 11.5T880-480q0 82-31.5 155t-86 127.5q-54.5 54.5-127 86T480-80Z" />
 </svg>`;
+
 const ICON_EDIT = html`<svg
   xmlns="http://www.w3.org/2000/svg"
   height="16px"
@@ -44,12 +45,8 @@ const ICON_EDIT = html`<svg
     d="M120-120v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm584-528 56-56-56-56-56 56 56 56Z" />
 </svg>`;
 
-const p5jsCdnUrl =
-  'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js';
+const p5jsCdnUrl = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js';
 
-/**
- * Chat state enum to manage the current state of the chat interface.
- */
 export enum ChatState {
   IDLE,
   GENERATING,
@@ -57,35 +54,26 @@ export enum ChatState {
   CODING,
 }
 
-/**
- * Chat tab enum to manage the current selected tab in the chat interface.
- */
 enum ChatTab {
   OBALA,
   CODE,
 }
 
-/**
- * Chat role enum to manage the current role of the message.
- */
 export enum ChatRole {
   USER,
   ASSISTANT,
   SYSTEM,
 }
 
-/**
- * Playground component for p5js.
- */
 @customElement('gdm-playground')
 export class Playground extends LitElement {
-  @query('#anchor') anchor;
-  @query('#reloadTooltip') reloadTooltip;
+  @query('#anchor') anchor!: HTMLElement;
+  @query('#reloadTooltip') reloadTooltip!: HTMLElement;
   private readonly codeSyntax = document.createElement('div');
 
   @state() chatState = ChatState.IDLE;
   @state() isRunning = true;
-  @state() selectedChatTab = ChatTab.GEMINI;
+  @state() selectedChatTab = ChatTab.OBALA;
   @state() inputMessage = '';
   @state() code = '';
   @state() messages: HTMLElement[] = [];
@@ -93,77 +81,31 @@ export class Playground extends LitElement {
   @state() codeNeedsReload = false;
 
   private defaultCode = '';
-  private readonly previewFrame: HTMLIFrameElement =
-    document.createElement('iframe');
+  private readonly previewFrame: HTMLIFrameElement = document.createElement('iframe');
   private lastError = '';
   private reportedError = false;
-  private toggleFullscreen() {
-  const iframe = this.previewFrame;
-  
-  if (!document.fullscreenElement) {
-    iframe.requestFullscreen().catch(err => {
-      console.error("Fullscreen error:", err);
-    });
-  } else {
-    document.exitFullscreen();
-  }
-}
 
-  sendMessageHandler?: CallableFunction;
-  resetHandler?: CallableFunction;
+  sendMessageHandler?: (input: string, role: string, code: string, codeHasChanged: boolean) => Promise<void>;
+  resetHandler?: () => void;
 
   constructor() {
     super();
     this.previewFrame.classList.add('preview-iframe');
     this.previewFrame.setAttribute('allowTransparency', 'true');
-
     this.codeSyntax.classList.add('code-syntax');
 
-  // Handle mobile viewport
- const setMobileViewport = () => {
-  if (window.innerWidth <= 768) {
-    document.documentElement.style.setProperty('--sidebar-width', '100%');
-  }
-};
-
-window.addEventListener('resize', setMobileViewport);
-setMobileViewport(); // Run on load
-
-function setup() {
-  let canvas = createCanvas(window.innerWidth, window.innerHeight);
-  canvas.style('width', '100%');
-  canvas.style('height', '100%');
-}
-
-function windowResized() {
-  resizeCanvas(window.innerWidth, window.innerHeight);
-}
-
-
-  
-
-
-
-  
-
-    /* Receive message from the iframe in case any error occures. */
-    window.addEventListener(
-      'message',
-      (msg) => {
-        if (msg.data && typeof msg.data === 'string') {
-          try {
-            const message = JSON.parse(msg.data).message;
-            this.runtimeErrorHandler(message);
-          } catch (e) {
-            console.error(e);
-          }
+    window.addEventListener('message', (msg) => {
+      if (msg.data && typeof msg.data === 'string') {
+        try {
+          const message = JSON.parse(msg.data).message;
+          this.runtimeErrorHandler(message);
+        } catch (e) {
+          console.error(e);
         }
-      },
-      false,
-    );
+      }
+    }, false);
   }
 
-  /** Disable shadow DOM */
   createRenderRoot() {
     return this;
   }
@@ -175,10 +117,7 @@ function windowResized() {
   async setCode(code: string) {
     this.code = code;
     this.runCode(code);
-
-    this.codeSyntax.innerHTML = await marked.parse(
-      '```javascript\n' + code + '\n```',
-    );
+    this.codeSyntax.innerHTML = await marked.parse('```javascript\n' + code + '\n```');
   }
 
   setChatState(state: ChatState) {
@@ -213,15 +152,14 @@ function windowResized() {
   <script>
     ${code}
     
-    // Auto-resize handling
-   function setup() {
-    let canvas = createCanvas(window.innerWidth, window.innerHeight);
-    canvas.style('display', 'block');
-  }
+    function setup() {
+      let canvas = createCanvas(window.innerWidth, window.innerHeight);
+      canvas.style('display', 'block');
+    }
 
-  function windowResized() {
-    resizeCanvas(window.innerWidth, window.innerHeight);
-  }
+    function windowResized() {
+      resizeCanvas(window.innerWidth, window.innerHeight);
+    }
   </script>
 </head>
 <body>
@@ -232,9 +170,18 @@ function windowResized() {
     this.codeNeedsReload = false;
   }
 
+  private toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      this.previewFrame.requestFullscreen().catch(err => {
+        console.error("Fullscreen error:", err);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
   runtimeErrorHandler(errorMessage: string) {
     this.reportedError = true;
-
     if (this.lastError !== errorMessage) {
       this.addMessage('system-ask', errorMessage);
     }
@@ -269,17 +216,13 @@ function windowResized() {
       btn.textContent = 'Improve';
       div.appendChild(btn);
       btn.addEventListener('click', () => {
-        // remove button
         div.removeChild(btn);
-
-        // call model
         this.sendMessageAction(message, 'SYSTEM');
       });
     }
 
     this.messages.push(div);
     this.requestUpdate();
-
     this.scrollToTheEnd();
 
     return {thinking, text};
@@ -297,15 +240,8 @@ function windowResized() {
     if (this.chatState !== ChatState.IDLE) return;
 
     this.chatState = ChatState.GENERATING;
-
-    let msg = '';
-    if (message) {
-      msg = message.trim();
-    } else {
-      // get message and empty the field
-      msg = this.inputMessage.trim();
-      this.inputMessage = '';
-    }
+    const msg = message ? message.trim() : this.inputMessage.trim();
+    this.inputMessage = '';
 
     if (msg.length === 0) {
       this.chatState = ChatState.IDLE;
@@ -313,18 +249,12 @@ function windowResized() {
     }
 
     const msgRole = role ? role.toLowerCase() : 'user';
-
     if (msgRole === 'user' && msg) {
       this.addMessage(msgRole, msg);
     }
 
     if (this.sendMessageHandler) {
-      await this.sendMessageHandler(
-        msg,
-        msgRole,
-        this.code,
-        this.codeHasChanged,
-      );
+      await this.sendMessageHandler(msg, msgRole, this.code, this.codeHasChanged);
       this.codeHasChanged = false;
     }
 
@@ -337,13 +267,13 @@ function windowResized() {
       this.runCode(this.code);
     }
     this.isRunning = true;
-    this.previewFrame.contentWindow.postMessage('resume', '*');
+    this.previewFrame.contentWindow?.postMessage('resume', '*');
   }
 
   private async stopAction() {
     if (!this.isRunning) return;
     this.isRunning = false;
-    this.previewFrame.contentWindow.postMessage('stop', '*');
+    this.previewFrame.contentWindow?.postMessage('stop', '*');
   }
 
   private async clearAction() {
@@ -357,14 +287,10 @@ function windowResized() {
 
   private async codeEditedAction(code: string) {
     if (this.chatState !== ChatState.IDLE) return;
-
     this.code = code;
     this.codeHasChanged = true;
     this.codeNeedsReload = true;
-
-    this.codeSyntax.innerHTML = await marked.parse(
-      '```javascript\n' + code + '\n```',
-    );
+    this.codeSyntax.innerHTML = await marked.parse('```javascript\n' + code + '\n```');
   }
 
   private async inputKeyDownAction(e: KeyboardEvent) {
@@ -381,207 +307,179 @@ function windowResized() {
   }
 
   render() {
-    return html`<div class="playground">
-      <div class="sidebar">
-        <div class="selector">
-          <button
-            id="geminiTab"
-            class=${classMap({
-              'selected-tab': this.selectedChatTab === ChatTab.GEMINI,
-            })}
-            @click=${() => {
-              this.selectedChatTab = ChatTab.GEMINI;
-            }}>
-            Obala
-          </button>
-          <button
-            id="codeTab"
-            class=${classMap({
-              'selected-tab': this.selectedChatTab === ChatTab.CODE,
-            })}
-            @click=${() => {
-              this.selectedChatTab = ChatTab.CODE;
-            }}>
-            Code ${this.codeHasChanged ? ICON_EDIT : html``}
-          </button>
-          // Add this with other toolbar buttons
-      <button 
-        id="fullscreen" 
-        @click=${this.toggleFullscreen}
-        title="Toggle Fullscreen">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
-        <path d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z"/>
-       </svg>
-        </button>`
-        
-      html`<div
-             id="chat"
-             class=${classMap({
-             tabcontent: true,
-             showtab: this.selectedChatTab === ChatTab.GEMINI
-            })}
-           >`
-           
-          <div class="chat-messages">
-             ${this.messages}
-             <div id="anchor"></div>
+    return html`
+      <div class="playground">
+        <div class="sidebar">
+          <div class="selector">
+            <button
+              id="geminiTab"
+              class=${classMap({
+                'selected-tab': this.selectedChatTab === ChatTab.OBALA,
+              })}
+              @click=${() => { this.selectedChatTab = ChatTab.OBALA; }}>
+              Obala
+            </button>
+            <button
+              id="codeTab"
+              class=${classMap({
+                'selected-tab': this.selectedChatTab === ChatTab.CODE,
+              })}
+              @click=${() => { this.selectedChatTab = ChatTab.CODE; }}>
+              Code ${this.codeHasChanged ? ICON_EDIT : html``}
+            </button>
           </div>
 
-          <div class="footer">
-            <div
-              id="chatStatus"
-              class=${classMap({'hidden': this.chatState === ChatState.IDLE})}>
-              ${this.chatState === ChatState.GENERATING
-                ? html`${ICON_BUSY} Generating...`
-                : html``}
-              ${this.chatState === ChatState.THINKING
-                ? html`${ICON_BUSY} Thinking...`
-                : html``}
-              ${this.chatState === ChatState.CODING
-                ? html`${ICON_BUSY} Coding...`
-                : html``}
+          <div
+            id="chat"
+            class=${classMap({
+              tabcontent: true,
+              showtab: this.selectedChatTab === ChatTab.OBALA,
+            })}>
+            <div class="chat-messages">
+              ${this.messages}
+              <div id="anchor"></div>
             </div>
-            <div id="inputArea">
-              <input
-                type="text"
-                id="messageInput"
-                .value=${this.inputMessage}
-                @input=${(e: InputEvent) => {
-                  this.inputMessage = (e.target as HTMLInputElement).value;
-                }}
-                @keydown=${(e: KeyboardEvent) => {
-                  this.inputKeyDownAction(e);
-                }}
-                placeholder="Type your message..."
-                autocomplete="off" />
-              <button
-                id="sendButton"
-                class=${classMap({
-                  'disabled': this.chatState !== ChatState.IDLE,
-                })}
-                @click=${() => {
-                  this.sendMessageAction();
-                }}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="30px"
-                  viewBox="0 -960 960 960"
-                  width="30px"
-                  fill="currentColor">
-                  <path d="M120-160v-240l320-80-320-80v-240l760 320-760 320Z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div
-          id="editor"
-          class=${classMap({
-            'tabcontent': true,
-            'showtab': this.selectedChatTab === ChatTab.CODE,
-          })}>
-          <div class="code-container">
-            ${this.codeSyntax}
-            <textarea
-              class="code-editor"
-              contenteditable=""
-              .value=${this.code}
-              .readonly=${this.chatState !== ChatState.IDLE}
-              @keyup=${(e: KeyboardEvent) => {
-                const val = (e.target as HTMLTextAreaElement).value;
-                if (this.code !== val) {
-                  this.codeEditedAction(val);
-                  this.requestUpdate();
-                }
-              }}
-              @change=${(e: InputEvent) => {
-                this.codeEditedAction((e.target as HTMLTextAreaElement).value);
-              }}></textarea>
-          </div>
-        </div>
-      </div>
 
-      <div class="main-container">
-        ${this.previewFrame}
-        <div class="toolbar">
-          <button
-            id="reloadCode"
-            @click=${() => {
-              this.reloadCodeAction();
-            }}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="30px"
-              viewBox="0 -960 960 960"
-              width="30px"
-              fill="currentColor">
-              <path
-                d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
-            </svg>
-            <div class="button-label">
-              <p>Reload</p>
+            <div class="footer">
               <div
-                id="reloadTooltip"
-                class="button-tooltip ${classMap({
-                  'show-tooltip': this.codeNeedsReload,
-                })}">
-                <p>Reload code changes</p>
+                id="chatStatus"
+                class=${classMap({'hidden': this.chatState === ChatState.IDLE})}>
+                ${this.chatState === ChatState.GENERATING ? html`${ICON_BUSY} Generating...` : html``}
+                ${this.chatState === ChatState.THINKING ? html`${ICON_BUSY} Thinking...` : html``}
+                ${this.chatState === ChatState.CODING ? html`${ICON_BUSY} Coding...` : html``}
+              </div>
+              <div id="inputArea">
+                <input
+                  type="text"
+                  id="messageInput"
+                  .value=${this.inputMessage}
+                  @input=${(e: Event) => { this.inputMessage = (e.target as HTMLInputElement).value; }}
+                  @keydown=${(e: KeyboardEvent) => { this.inputKeyDownAction(e); }}
+                  placeholder="Type your message..."
+                  autocomplete="off" />
+                <button
+                  id="sendButton"
+                  class=${classMap({'disabled': this.chatState !== ChatState.IDLE})}
+                  @click=${() => { this.sendMessageAction(); }}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="30px"
+                    viewBox="0 -960 960 960"
+                    width="30px"
+                    fill="currentColor">
+                    <path d="M120-160v-240l320-80-320-80v-240l760 320-760 320Z" />
+                  </svg>
+                </button>
               </div>
             </div>
-          </button>
-          <button
-            id="runCode"
-            class=${classMap({'disabled': this.isRunning})}
-            @click=${() => {
-              this.playAction();
-            }}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="55px"
-              viewBox="0 -960 960 960"
-              width="55px"
-              fill="currentColor">
-              <path
-                d="m380-300 280-180-280-180v360ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
-            </svg>
-          </button>
-          <button
-            id="stop"
-            class=${classMap({'disabled': !this.isRunning})}
-            @click=${() => {
-              this.stopAction();
-            }}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="55px"
-              viewBox="0 -960 960 960"
-              width="55px"
-              fill="currentColor">
-              <path
-                d="M320-320h320v-320H320v320ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
-            </svg>
-          </button>
-          <button
-            id="clear"
-            @click=${() => {
-              this.clearAction();
-            }}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="30px"
-              viewBox="0 -960 960 960"
-              width="30px"
-              fill="currentColor">
-              <path
-                d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z" />
-            </svg>
-            <div class="button-label">
-              <p>Reset</p>
+          </div>
+
+          <div
+            id="editor"
+            class=${classMap({
+              tabcontent: true,
+              showtab: this.selectedChatTab === ChatTab.CODE,
+            })}>
+            <div class="code-container">
+              ${this.codeSyntax}
+              <textarea
+                class="code-editor"
+                contenteditable=""
+                .value=${this.code}
+                .readonly=${this.chatState !== ChatState.IDLE}
+                @keyup=${(e: KeyboardEvent) => {
+                  const val = (e.target as HTMLTextAreaElement).value;
+                  if (this.code !== val) {
+                    this.codeEditedAction(val);
+                    this.requestUpdate();
+                  }
+                }}
+                @change=${(e: Event) => {
+                  this.codeEditedAction((e.target as HTMLTextAreaElement).value);
+                }}></textarea>
             </div>
-          </button>
+          </div>
+        </div>
+
+        <div class="main-container">
+          ${this.previewFrame}
+          <div class="toolbar">
+            <button
+              id="reloadCode"
+              @click=${() => { this.reloadCodeAction(); }}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="30px"
+                viewBox="0 -960 960 960"
+                width="30px"
+                fill="currentColor">
+                <path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
+              </svg>
+              <div class="button-label">
+                <p>Reload</p>
+                <div
+                  id="reloadTooltip"
+                  class="button-tooltip ${classMap({
+                    'show-tooltip': this.codeNeedsReload,
+                  })}">
+                  <p>Reload code changes</p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              id="fullscreen"
+              @click=${this.toggleFullscreen}
+              title="Toggle Fullscreen">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+                <path d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z"/>
+              </svg>
+            </button>
+
+            <button
+              id="runCode"
+              class=${classMap({'disabled': this.isRunning})}
+              @click=${() => { this.playAction(); }}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="55px"
+                viewBox="0 -960 960 960"
+                width="55px"
+                fill="currentColor">
+                <path d="m380-300 280-180-280-180v360ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
+              </svg>
+            </button>
+            <button
+              id="stop"
+              class=${classMap({'disabled': !this.isRunning})}
+              @click=${() => { this.stopAction(); }}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="55px"
+                viewBox="0 -960 960 960"
+                width="55px"
+                fill="currentColor">
+                <path d="M320-320h320v-320H320v320ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
+              </svg>
+            </button>
+            <button
+              id="clear"
+              @click=${() => { this.clearAction(); }}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="30px"
+                viewBox="0 -960 960 960"
+                width="30px"
+                fill="currentColor">
+                <path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Z" />
+              </svg>
+              <div class="button-label">
+                <p>Reset</p>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
-    
-    </div>`;
+    `;
   }
 }
