@@ -919,3 +919,22 @@ canvas {
     position: absolute; /* Better for some Android devices */
   }
 }
+.preview-iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none;
+  background: var(--color-bg);
+}
+
+/* Mobile layout adjustment */
+@media (max-width: 768px) {
+  .playground {
+    flex-direction: column;
+  }
+  .main-container {
+    height: 60vh !important;  /* Larger canvas area */
+  }
+  .sidebar {
+    height: 40vh !important;
+  }
+}
