@@ -118,6 +118,19 @@ export class Playground extends LitElement {
 window.addEventListener('resize', setMobileViewport);
 setMobileViewport(); // Run on load
 
+function setup() {
+  let canvas = createCanvas(window.innerWidth, window.innerHeight);
+  canvas.style('width', '100%');
+  canvas.style('height', '100%');
+}
+
+function windowResized() {
+  resizeCanvas(window.innerWidth, window.innerHeight);
+}
+
+
+  
+
 
 
   
